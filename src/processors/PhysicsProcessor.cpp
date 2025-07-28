@@ -19,8 +19,14 @@ void PhysicsProcessor::Initialize(const Scene& scene) {
 }
 
 void PhysicsProcessor::Step(float dt) {
+    if (time_scale_ == 0.f) {
+        return;
+    }
+
     for (const auto& body: bodies_) {
-        body->Step(dt);
+        if (body->Enabled()) {
+            body->Step(dt * time_scale_);
+        }
     }
 
     for (const auto& p1: collider_groups_) {
@@ -29,7 +35,13 @@ void PhysicsProcessor::Step(float dt) {
                 continue;
             }
             for (const auto& col1: p1.second) {
+                if (!col1->Enabled()) {
+                    continue;
+                }
                 for (const auto& col2: p2.second) {
+                    if (!col2->Enabled()) {
+                        continue;
+                    }
                     if (col1->Intersects(*col2)) {
                         BoxCollider::OnCollision(*col1, *col2);
                     }
@@ -42,4 +54,8 @@ void PhysicsProcessor::Step(float dt) {
 void PhysicsProcessor::Clear() {
     bodies_.clear();
     collider_groups_.clear();
+}
+
+void PhysicsProcessor::SetTimeScale(float value) {
+    time_scale_ = value;
 }

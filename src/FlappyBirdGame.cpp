@@ -1,5 +1,6 @@
 #include "FlappyBirdGame.h"
 #include "components/CounterRenderer.h"
+#include "components/KeyTrigger.h"
 
 FlappyBirdGame::FlappyBirdGame(Screen screen) :
         screen_(std::move(screen)),
@@ -37,7 +38,7 @@ void FlappyBirdGame::BuildScene() {
     static const float pipe_interval = 90.f;
     static const Vector2 pipe_size = {26.f, 160.f};
     static const Vector2 pipe_speed = {-50.f, 0.f};
-    static const float pipe_gap = 55.f;
+    static const float pipe_gap = 50.f;
     static const float ground_y = VIEWPORT_HEIGHT - 25.f;
 
     int pipe_count = std::ceil((viewport_width + pipe_size.x) / pipe_interval);
@@ -104,11 +105,21 @@ void FlappyBirdGame::BuildScene() {
             Vector2{0.f, VIEWPORT_HEIGHT}, 1);
 
 
+    // Get Ready label
+    auto ready_label = scene_.CreateObject({viewport_width * 0.5f, VIEWPORT_HEIGHT * 0.3f})
+            .AddComponent<SpriteRenderer>(sprite_factory_.Create("text_ready"), 120);
+
+
+    // Tutorial picture
+    auto tutorial_picture = scene_.CreateObject({viewport_width * 0.5f, VIEWPORT_HEIGHT * 0.6f})
+            .AddComponent<SpriteRenderer>(sprite_factory_.Create("tutorial"), 110);
+
+
     // Bird
     auto& bird = scene_.CreateObject({60.f, VIEWPORT_HEIGHT * 0.4f});
     bird.AddComponent<SpriteRenderer>(sprite_factory_.Create("bird0_0"), 10);
     bird.AddComponent<Rigidbody>(Vector2::zero, Vector2{0.f, 500.f});
-    auto bird_collider = bird.AddComponent<BoxCollider>(Vector2{16.f, 16.f}, 0);
+    auto bird_collider = bird.AddComponent<BoxCollider>(Vector2{8.f, 8.f}, 0);
     bird.AddComponent<BirdController>(VK_SPACE, -160.f, 220.f);
     bird.AddComponent<SpriteAnimator>(std::initializer_list{
             sprite_factory_.Create("bird0_0"),
@@ -132,5 +143,22 @@ void FlappyBirdGame::BuildScene() {
     });
 
 
+    // State Manager
+    auto& state_manager = scene_.CreateObject();
+    auto start_trigger = state_manager.AddComponent<KeyTrigger>(VK_SPACE);
+    start_trigger->SetCallback([
+                                       start_trigger = std::weak_ptr(start_trigger),
+                                       tutorial_picture = std::weak_ptr(tutorial_picture),
+                                       ready_label = std::weak_ptr(ready_label),
+                                       this
+                               ]() {
+        tutorial_picture.lock()->SetEnabled(false);
+        ready_label.lock()->SetEnabled(false);
+        start_trigger.lock()->SetEnabled(false);
+        scene_.SetPhysicsTimeScale(1.f);
+    });
+
+
+    scene_.SetPhysicsTimeScale(0.f);
     scene_.Initialize();
 }

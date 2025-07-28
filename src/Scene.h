@@ -18,6 +18,8 @@ public:
 
     void Draw();
 
+    void SetPhysicsTimeScale(float value);
+
     template<typename T>
     std::shared_ptr<T> GetComponent() const {
         for (const auto& object: objects_) {

@@ -37,3 +37,7 @@ void Scene::Clear() {
     render_processor_.Clear();
     physics_processor_.Clear();
 }
+
+void Scene::SetPhysicsTimeScale(float value) {
+    physics_processor_.SetTimeScale(value);
+}

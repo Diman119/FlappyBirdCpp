@@ -13,7 +13,9 @@ void RenderProcessor::Initialize(const Scene& scene) {
 void RenderProcessor::Render() {
     main_camera_->Target().Clear();
     for (const auto& renderer: renderers_) {
-        renderer->Render(*main_camera_);
+        if (renderer->Enabled()) {
+            renderer->Render(*main_camera_);
+        }
     }
 }
 

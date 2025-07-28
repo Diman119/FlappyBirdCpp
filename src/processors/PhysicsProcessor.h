@@ -17,7 +17,10 @@ public:
 
     void Step(float dt);
 
+    void SetTimeScale(float value);
+
 private:
     SptrVector<Rigidbody> bodies_;
     std::unordered_map<int, SptrVector<BoxCollider>> collider_groups_;
+    float time_scale_ = 1.f;
 };

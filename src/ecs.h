@@ -24,8 +24,17 @@ public:
 
     virtual ~Component() = default;
 
+    [[nodiscard]] bool Enabled() const {
+        return enabled_;
+    }
+
+    void SetEnabled(bool value) {
+        enabled_ = value;
+    }
+
 private:
     std::weak_ptr<GameObject> game_object_;
+    bool enabled_ = true;
 
     friend class GameObject;
 };
@@ -40,7 +49,9 @@ public:
 
     void Update(float dt) {
         for (const auto& component: components_) {
-            component->Update(dt);
+            if (component->Enabled()) {
+                component->Update(dt);
+            }
         }
     }
 
