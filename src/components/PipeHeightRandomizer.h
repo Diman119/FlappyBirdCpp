@@ -10,9 +10,9 @@ public:
 
     void Awake() override;
 
-private:
-    void RandomizeY();
+    void RandomizeHeight();
 
+private:
     std::weak_ptr<GameObject> second_part_;
     UniformRNG generator_y_;
     float interval_y_;

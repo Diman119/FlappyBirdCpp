@@ -7,7 +7,7 @@ PipeHeightRandomizer::PipeHeightRandomizer(float interval_y, UniformRNG generato
         generator_y_(generator_y),
         interval_y_(interval_y) {}
 
-void PipeHeightRandomizer::RandomizeY() {
+void PipeHeightRandomizer::RandomizeHeight() {
     auto first_part = GetGameObject();
     auto position = Vector2{first_part->position.x, generator_y_.Generate() - interval_y_ * 0.5f};
     first_part->position = position;
@@ -15,6 +15,6 @@ void PipeHeightRandomizer::RandomizeY() {
 }
 
 void PipeHeightRandomizer::Awake() {
-    RandomizeY();
-    GetComponent<PositionRecycler>()->SetRecycleCallback([this]() { RandomizeY(); });
+    RandomizeHeight();
+    GetComponent<PositionRecycler>()->SetRecycleCallback([this]() { RandomizeHeight(); });
 }
