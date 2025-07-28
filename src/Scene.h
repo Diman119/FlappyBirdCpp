@@ -38,6 +38,13 @@ public:
         }
     }
 
+    template<typename T>
+    void GetComponents(WptrVector<T>& output) const {
+        for (const auto& object: objects_) {
+            object->GetComponents(output);
+        }
+    }
+
 private:
     RenderProcessor render_processor_;
     PhysicsProcessor physics_processor_;

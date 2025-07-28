@@ -7,6 +7,9 @@
 template<typename T>
 using SptrVector = std::vector<std::shared_ptr<T>>;
 
+template<typename T>
+using WptrVector = std::vector<std::weak_ptr<T>>;
+
 class GameObject;
 
 class Component {
@@ -68,6 +71,16 @@ public:
 
     template<typename T>
     void GetComponents(SptrVector<T>& output) const {
+        for (const auto& component: components_) {
+            auto casted = std::dynamic_pointer_cast<T>(component);
+            if (casted) {
+                output.push_back(std::move(casted));
+            }
+        }
+    }
+
+    template<typename T>
+    void GetComponents(WptrVector<T>& output) const {
         for (const auto& component: components_) {
             auto casted = std::dynamic_pointer_cast<T>(component);
             if (casted) {

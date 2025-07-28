@@ -12,6 +12,7 @@
 #include "components/KeyTrigger.h"
 #include "components/DelayedCallback.h"
 #include "components/ScoreManager.h"
+#include "components/PositionResetter.h"
 
 FlappyBirdGame::FlappyBirdGame(Screen screen) :
         screen_(std::move(screen)),
@@ -50,15 +51,12 @@ void FlappyBirdGame::BuildScene() {
     static const Vector2 pipe_size = {26.f, 160.f};
     static const Vector2 pipe_speed = {-50.f, 0.f};
     static const float pipe_gap = 45.f;
-    const float pipe_initial_x_offset = viewport_width + pipe_size.x;
     static const float ground_y = VIEWPORT_HEIGHT - 25.f;
-
-    std::vector<std::weak_ptr<GameObject>> pipe_list;
 
     int pipe_count = std::ceil((viewport_width + pipe_size.x) / pipe_interval);
     std::random_device randomDevice;
     for (int i = 0; i < pipe_count; ++i) {
-        Vector2 position{static_cast<float>(i) * pipe_interval + pipe_initial_x_offset, 0.f};
+        Vector2 position{static_cast<float>(i) * pipe_interval + viewport_width + pipe_size.x, 0.f};
 
         auto& pipe_up = scene_.CreateObject(position);
         pipe_up.AddComponent<SpriteRenderer>(sprite_factory_.Create("pipe_up"), 20);
@@ -76,9 +74,7 @@ void FlappyBirdGame::BuildScene() {
                                                      UniformRNG(randomDevice, 45.f,
                                                                 ground_y - 45.f),
                                                      pipe_up.weak_from_this());
-
-        pipe_list.push_back(pipe_up.weak_from_this());
-        pipe_list.push_back(pipe_down.weak_from_this());
+        pipe_down.AddComponent<PositionResetter>();
     }
 
 
@@ -123,6 +119,7 @@ void FlappyBirdGame::BuildScene() {
     score_trigger.AddComponent<Rigidbody>(pipe_speed, Vector2::zero);
     auto score_trigger_collider = score_trigger.AddComponent<BoxCollider>(
             Vector2{0.f, VIEWPORT_HEIGHT}, 1);
+    score_trigger.AddComponent<PositionResetter>();
 
 
     // Get Ready label
@@ -142,9 +139,7 @@ void FlappyBirdGame::BuildScene() {
 
 
     // Bird
-    static const Vector2 bird_start_position{60.f, VIEWPORT_HEIGHT * 0.4f};
-
-    auto& bird = scene_.CreateObject(bird_start_position);
+    auto& bird = scene_.CreateObject({60.f, VIEWPORT_HEIGHT * 0.4f});
     bird.AddComponent<SpriteRenderer>(sprite_factory_.Create("bird0_0"), 10);
     bird.AddComponent<Rigidbody>(Vector2::zero, Vector2{0.f, 500.f});
     auto bird_collider = bird.AddComponent<BoxCollider>(Vector2{8.f, 8.f}, 0);
@@ -155,6 +150,7 @@ void FlappyBirdGame::BuildScene() {
             sprite_factory_.Create("bird0_2"),
             sprite_factory_.Create("bird0_1")
     }, 10.f);
+    bird.AddComponent<PositionResetter>();
 
 
     // State Manager
@@ -174,6 +170,8 @@ void FlappyBirdGame::BuildScene() {
     });
 
     static const float restart_delay = 3.f;
+    WptrVector<PositionResetter> resettables;
+    scene_.GetComponents(resettables);
 
     auto reset_trigger = state_manager.AddComponent<DelayedCallback>(restart_delay);
     reset_trigger->SetCallback([
@@ -185,8 +183,7 @@ void FlappyBirdGame::BuildScene() {
                                        bird_animator = std::weak_ptr(bird_animator),
                                        score_manager = std::weak_ptr(score_manager),
                                        score_trigger = std::weak_ptr(score_trigger_collider),
-                                       pipe_list = std::move(pipe_list),
-                                       pipe_initial_x_offset
+                                       resettables = std::move(resettables)
                                ]() {
         game_over_label.lock()->SetEnabled(false);
         auto rs = reset_trigger.lock();
@@ -198,15 +195,12 @@ void FlappyBirdGame::BuildScene() {
         ready_label.lock()->SetEnabled(true);
         start_trigger.lock()->SetEnabled(true);
 
-        auto ba = bird_animator.lock();
-        ba->SetEnabled(true);
-        ba->GetGameObject()->position = bird_start_position;
+        bird_animator.lock()->SetEnabled(true);
 
-        score_trigger.lock()->GetGameObject()->position.x += pipe_initial_x_offset;
-        for (const auto& pipe: pipe_list) {
-            auto p = pipe.lock();
-            p->position.x += pipe_initial_x_offset;
-            if (auto randomizer = p->GetComponent<PipeHeightRandomizer>(); randomizer) {
+        for (const auto& resettable: resettables) {
+            auto ptr = resettable.lock();
+            ptr->ResetPosition();
+            if (auto randomizer = ptr->GetComponent<PipeHeightRandomizer>(); randomizer) {
                 randomizer->RandomizeHeight();
             }
         }
