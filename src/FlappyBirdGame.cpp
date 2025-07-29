@@ -16,7 +16,7 @@
 
 FlappyBirdGame::FlappyBirdGame(Screen screen) :
         screen_(std::move(screen)),
-        sprite_factory_(SPRITE_LIST, Image(&atlas_image),
+        sprite_factory_("assets/atlas.bin", "assets/atlas.txt",
                         static_cast<float>(screen_.Height()) / VIEWPORT_HEIGHT) {
     BuildScene();
 }
@@ -113,6 +113,7 @@ void FlappyBirdGame::BuildScene() {
                     sprite_factory_.Create("number_score_09"),
             }, 100);
     auto score_manager = score_display.AddComponent<ScoreManager>();
+
 
     // Score increment trigger
     auto& score_trigger = scene_.CreateObject({viewport_width + pipe_size.x, VIEWPORT_HEIGHT * 0.5f});

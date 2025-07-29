@@ -1,7 +1,7 @@
 #include <cmath>
 #include "Sprite.h"
 
-Sprite::Sprite(const Image& atlas, SpriteCoordinates coordinates) : coordinates_(coordinates), atlas_(&atlas) {}
+Sprite::Sprite(const Image& atlas, Coordinates coordinates) : coordinates_(coordinates), atlas_(&atlas) {}
 
 void Sprite::Blit(Surface& target, Vector2 target_position, bool alpha_blending) const {
     atlas_->Blit(target, static_cast<int>(std::round(target_position.x)),

@@ -1,6 +1,6 @@
 #include "BoxCollider.h"
 
-BoxCollider::BoxCollider(Vector2 size, int collision_group) : size_(size), collision_group_(collision_group) {}
+BoxCollider::BoxCollider(Vector2 size, int collision_group) : collision_group_(collision_group), size_(size) {}
 
 bool BoxCollider::Intersects(const BoxCollider& other) const {
     auto offset = GetGameObject()->position - other.GetGameObject()->position;

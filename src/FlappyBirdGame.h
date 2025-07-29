@@ -1,12 +1,8 @@
 #pragma once
 
-#include <vector>
-#include <memory>
-#include <random>
 #include "rendering/Screen.h"
-#include "textures/atlas.c"
-#include "rendering/SpriteFactory.h"
 #include "Scene.h"
+#include "rendering/SpriteFactory.h"
 
 class FlappyBirdGame {
 public:

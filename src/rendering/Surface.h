@@ -10,11 +10,11 @@ public:
         Blit(target, x, y, 0, width_, 0, height_, alpha_blend);
     }
 
-    [[nodiscard]] int Width() const {
+    [[nodiscard]] uint32_t Width() const {
         return width_;
     }
 
-    [[nodiscard]] int Height() const {
+    [[nodiscard]] uint32_t Height() const {
         return height_;
     }
 
@@ -26,7 +26,7 @@ public:
     void Clear();
 
 protected:
-    Surface(int width, int height) : width_(width), height_(height) {}
+    Surface(uint16_t width, uint16_t height) : width_(width), height_(height) {}
 
     [[nodiscard]] virtual uint32_t* PixelData() = 0;
 
@@ -34,6 +34,6 @@ protected:
 
     static uint32_t AlphaBlendPixels(uint32_t p1, uint32_t p2);
 
-    int width_;
-    int height_;
+    uint16_t width_;
+    uint16_t height_;
 };
